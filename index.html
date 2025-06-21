@@ -129,22 +129,88 @@
     </div>
   </div>
 
+  <!-- Service Worker Registration -->
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+            
+            // Update available
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('New content is available; please refresh.');
+                  if (confirm('Nova versão disponível! Deseja atualizar?')) {
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+
+    // PWA Install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      // Show install button or banner
+      const installBanner = document.createElement('div');
+      installBanner.innerHTML = `
+        <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: #2563eb; color: white; padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>Instalar App</strong><br>
+              <small>Adicione à tela inicial para acesso rápido</small>
+            </div>
+            <button id="install-btn" style="background: white; color: #2563eb; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold;">
+              Instalar
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(installBanner);
+      
+      document.getElementById('install-btn').addEventListener('click', () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+          installBanner.remove();
+        });
+      });
+    });
+  </script>
+
   <!-- Capacitor Scripts -->
   <script type="module" src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
   <script>
-    import { Capacitor } from '@capacitor/core';
-    import { SplashScreen } from '@capacitor/splash-screen';
-    import { StatusBar, Style } from '@capacitor/status-bar';
-
-    // Initialize Capacitor plugins
-    const initializeApp = async () => {
-      if (Capacitor.isNativePlatform()) {
-        await StatusBar.setStyle({ style: Style.Dark });
-        await SplashScreen.hide();
+    // Capacitor initialization (for mobile app)
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        const { StatusBar, Style } = window.Capacitor.Plugins;
+        const { SplashScreen } = window.Capacitor.Plugins;
+        
+        try {
+          await StatusBar.setStyle({ style: Style.Dark });
+          await SplashScreen.hide();
+        } catch (error) {
+          console.log('Capacitor plugins not available:', error);
+        }
       }
-    };
-
-    document.addEventListener('DOMContentLoaded', initializeApp);
+    });
   </script>
   
   <!-- Scripts -->

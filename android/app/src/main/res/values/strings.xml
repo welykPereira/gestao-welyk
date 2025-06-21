@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Gestão do Welyk</string>
-    <string name="title_activity_main">Gestão do Welyk</string>
-    <string name="package_name">com.welyk.gestao</string>
-    <string name="custom_url_scheme">com.welyk.gestao</string>
-</resources>

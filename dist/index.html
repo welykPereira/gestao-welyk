@@ -129,6 +129,24 @@
     </div>
   </div>
 
+  <!-- Capacitor Scripts -->
+  <script type="module" src="https://unpkg.com/@capacitor/core@latest/dist/capacitor.js"></script>
+  <script>
+    import { Capacitor } from '@capacitor/core';
+    import { SplashScreen } from '@capacitor/splash-screen';
+    import { StatusBar, Style } from '@capacitor/status-bar';
+
+    // Initialize Capacitor plugins
+    const initializeApp = async () => {
+      if (Capacitor.isNativePlatform()) {
+        await StatusBar.setStyle({ style: Style.Dark });
+        await SplashScreen.hide();
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', initializeApp);
+  </script>
+  
   <!-- Scripts -->
   <script src="./app.js"></script>
   <script>
